@@ -17,6 +17,12 @@ pyobjc-framework-CoreBluetooth>=9.0; sys_platform == 'darwin'
 # Network
 requests>=2.31.0
 
+# Sistem İzleme
+psutil>=5.9.0
+
+# WiFi Kontrol (Linux/Raspberry Pi için)
+nmcli>=0.0.1
+
 # Ek araçlar (opsiyonel)
 # Telefon ekran yansıtma için scrcpy harici bir araç
 # Linux: sudo apt install scrcpy

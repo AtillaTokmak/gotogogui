@@ -1,8 +1,10 @@
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import QWebEngineProfile, QWebEngineSettings
 from PySide6.QtCore import QUrl, Qt, QTimer, QProcess
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 import subprocess
 import os
+import platform
 
 
 class MapView(QWebEngineView):
@@ -13,8 +15,12 @@ class MapView(QWebEngineView):
     def __init__(self):
         super().__init__()
         
+        # WebEngine profili - cookies ve permissions
+        self.setup_web_engine()
+        
         # Mevcut görünüm tipini takip et
         self.current_view = 'maps'  # 'maps', 'youtube', 'spotify'
+        self.race_mode = False  # RACE MODE açık mı
         
         # Google Maps'i varsayılan olarak yükle (konum izni ile)
         self.load_maps()
@@ -31,6 +37,29 @@ class MapView(QWebEngineView):
         self.check_timer = QTimer()
         self.check_timer.timeout.connect(self.check_phone_connection)
         self.check_timer.start(5000)  # Her 5 saniyede kontrol
+    
+    def setup_web_engine(self):
+        """WebEngine profilini ayarla - cookies, permissions, vs"""
+        profile = QWebEngineProfile.defaultProfile()
+        
+        # Cookies'i etkinleştir ve kaydet
+        profile.setPersistentCookiesPolicy(
+            QWebEngineProfile.PersistentCookiesPolicy.ForcePersistentCookies
+        )
+        
+        # Web sitelerinin çerezlerini kalıcı olarak sakla
+        cookies_path = os.path.expanduser('~/.goatogo/cookies')
+        os.makedirs(cookies_path, exist_ok=True)
+        
+        # Geçici depolama (localStorage, sessionStorage)
+        profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.DiskHttpCache)
+        
+        # Settings
+        settings = self.settings()
+        settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
+        # JavaScript hataları tolerate et (Google Messages vs için)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
     
     def load_maps(self):
         """Google Maps'i konum izni ile yükle"""
@@ -51,22 +80,30 @@ class MapView(QWebEngineView):
         self.setUrl(QUrl(spotify_url))
         self.current_view = 'spotify'
     
-    def load_messages(self):
-        """Google Messages'ı yükle"""
-        messages_url = "https://messages.google.com/web/"
-        self.setUrl(QUrl(messages_url))
-        self.current_view = 'messages'
-    
     def switch_view(self, view_type: str):
-        """Görünümü değiştir (maps, youtube, spotify, messages)"""
+        """Görünümü değiştir (maps, youtube, spotify)"""
         if view_type == 'maps':
             self.load_maps()
         elif view_type == 'youtube':
             self.load_youtube()
         elif view_type == 'spotify':
             self.load_spotify()
-        elif view_type == 'messages':
-            self.load_messages()
+    
+    def toggle_race_mode(self):
+        """RACE MODE'u aç/kapat"""
+        self.race_mode = not self.race_mode
+        
+        if self.race_mode:
+            # RACE MODE açık - webview gizle
+            self.hide()
+        else:
+            # RACE MODE kapalı - webview göster
+            self.show()
+            self.load_maps()  # Haritaya dön
+    
+    def on_page_loaded(self, success):
+        """Sayfa yüklendikten sonra"""
+        pass
     
     def check_phone_connection(self):
         """USB ile bağlı telefon kontrolü (ADB)"""
