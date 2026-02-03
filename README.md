@@ -1,3 +1,5 @@
+###**Rahman Ve Rahim Olan Allah'ın Adıyla (başlarım)**
+
 # GoToGo Dashboard v2.0 🚗
 
 Tesla tarzı, modern araç kontrol paneli uygulaması. Arduino tabanlı elektronik diferansiyel sistemi (EDS) ile entegre.
@@ -215,4 +217,4 @@ Sorularınız için issue açabilirsiniz.
 
 ---
 
-**Rahman Ve Rahim Olan Allah'ın Adıyla** 🙏
+
