@@ -39,20 +39,45 @@ class BottomBar(QWidget):
         # Media butonları
         self.spotify_btn = QPushButton("🎵 Spotify")
         self.youtube_btn = QPushButton("📺 YouTube")
-        self.messages_btn = QPushButton("💬 Mesajlar")
         
         # Harita butonu (Google Maps'e dön)
         self.maps_btn = QPushButton("🗺️ Harita")
         
-        # Bağlantı durumu göstergesi
+        # WiFi butonu
+        self.wifi_btn = QPushButton("📡 WiFi")
+        
+        # RACE MODE butonu
+        self.race_mode_btn = QPushButton("🏁 RACE MODE")
+        self.race_mode_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                color: white;
+                font-size: 16px;
+                padding: 10px 20px;
+                border: 2px solid transparent;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                color: #ff4444;
+                border: 2px solid #ff4444;
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 68, 68, 0.2);
+            }
+        """)
+        
+        # Telefon Yansıtma butonu
+        self.phone_mirror_btn = QPushButton("📱 Phone Mirror")
         self.connection_status = QLabel("● Bağlantı: Bekliyor...")
         self.connection_status.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         
         # Layout'a ekle
         layout.addWidget(self.spotify_btn)
         layout.addWidget(self.youtube_btn)
-        layout.addWidget(self.messages_btn)
         layout.addWidget(self.maps_btn)
+        layout.addWidget(self.wifi_btn)
+        layout.addWidget(self.phone_mirror_btn)
+        layout.addWidget(self.race_mode_btn)
         layout.addStretch()
         layout.addWidget(self.connection_status)
     

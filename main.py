@@ -8,6 +8,8 @@ from PySide6.QtCore import QTimer
 
 from arduino.arduino_reader import ArduinoReader, ConnectionType
 from ui.connection_dialog import ConnectionSettingsDialog
+from ui.wifi_manager import WiFiManagerDialog
+from ui.phone_mirror import PhoneMirrorDialog
 from ui.left_panel import LeftPanel
 from ui.map_view import MapView
 from ui.bottom_bar import BottomBar
@@ -76,12 +78,18 @@ class MainWindow(QMainWindow):
         self.bottom_bar.youtube_btn.clicked.connect(
             lambda: self.map_view.switch_view('youtube')
         )
-        self.bottom_bar.messages_btn.clicked.connect(
-            lambda: self.map_view.switch_view('messages')
-        )
         self.bottom_bar.maps_btn.clicked.connect(
             lambda: self.map_view.switch_view('maps')
         )
+        
+        # -------- WiFi Butonu --------
+        self.bottom_bar.wifi_btn.clicked.connect(self.show_wifi_manager)
+        
+        # -------- RACE MODE Butonu --------
+        self.bottom_bar.race_mode_btn.clicked.connect(self.toggle_race_mode)
+        
+        # -------- Phone Mirror Butonu --------
+        self.bottom_bar.phone_mirror_btn.clicked.connect(self.show_phone_mirror)
         
         # -------- Layout attach --------
         main_v.addLayout(top_h)
@@ -108,6 +116,68 @@ class MainWindow(QMainWindow):
         """Bağlantı ayarları dialogunu göster"""
         dialog = ConnectionSettingsDialog(self)
         dialog.connection_changed.connect(self.start_arduino_connection)
+        dialog.exec()
+    
+    def show_wifi_manager(self):
+        """WiFi Yönetimi dialogunu göster"""
+        dialog = WiFiManagerDialog(self)
+        dialog.exec()
+    
+    def toggle_race_mode(self):
+        """RACE MODE'u aç/kapat"""
+        self.map_view.toggle_race_mode()
+        
+        if self.map_view.race_mode:
+            # RACE MODE açık
+            self.bottom_bar.race_mode_btn.setText("🏁 EXIT RACE MODE")
+            self.bottom_bar.race_mode_btn.setStyleSheet("""
+                QPushButton {
+                    background: rgba(255, 68, 68, 0.3);
+                    color: #ff4444;
+                    font-size: 16px;
+                    padding: 10px 20px;
+                    border: 2px solid #ff4444;
+                    border-radius: 5px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background: rgba(255, 68, 68, 0.5);
+                }
+            """)
+            # Diğer butonları devre dışı bırak
+            self.bottom_bar.spotify_btn.setEnabled(False)
+            self.bottom_bar.youtube_btn.setEnabled(False)
+            self.bottom_bar.maps_btn.setEnabled(False)
+            self.bottom_bar.wifi_btn.setEnabled(False)
+        else:
+            # RACE MODE kapalı
+            self.bottom_bar.race_mode_btn.setText("🏁 RACE MODE")
+            self.bottom_bar.race_mode_btn.setStyleSheet("""
+                QPushButton {
+                    background: transparent;
+                    color: white;
+                    font-size: 16px;
+                    padding: 10px 20px;
+                    border: 2px solid transparent;
+                    border-radius: 5px;
+                }
+                QPushButton:hover {
+                    color: #ff4444;
+                    border: 2px solid #ff4444;
+                }
+                QPushButton:pressed {
+                    background-color: rgba(255, 68, 68, 0.2);
+                }
+            """)
+            # Diğer butonları etkinleştir
+            self.bottom_bar.spotify_btn.setEnabled(True)
+            self.bottom_bar.youtube_btn.setEnabled(True)
+            self.bottom_bar.maps_btn.setEnabled(True)
+            self.bottom_bar.wifi_btn.setEnabled(True)
+    
+    def show_phone_mirror(self):
+        """Telefon yansıtma dialogunu göster"""
+        dialog = PhoneMirrorDialog(self)
         dialog.exec()
     
     def start_arduino_connection(self, connection_type: str, params: dict):
