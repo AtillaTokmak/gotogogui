@@ -1,0 +1,24 @@
+# GoToGo Dashboard Requirements
+
+# Qt Framework
+PySide6>=6.5.0
+PySide6-WebEngine>=6.5.0
+
+# Serial İletişim
+pyserial>=3.5
+
+# Bluetooth (Linux için PyBluez)
+# Windows için: pip install pybluez
+# Linux için: pip install pybluez
+pybluez>=0.23; sys_platform == 'linux'
+# macOS için: pip install pyobjc-framework-CoreBluetooth
+pyobjc-framework-CoreBluetooth>=9.0; sys_platform == 'darwin'
+
+# Network
+requests>=2.31.0
+
+# Ek araçlar (opsiyonel)
+# Telefon ekran yansıtma için scrcpy harici bir araç
+# Linux: sudo apt install scrcpy
+# Windows: scoop install scrcpy veya https://github.com/Genymobile/scrcpy
+# macOS: brew install scrcpy
