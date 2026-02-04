@@ -20,6 +20,7 @@ Tesla tarzı, modern araç kontrol paneli uygulaması. Arduino tabanlı elektron
 
 ### Yeni Özellikler (v2.0)
 - 📱 **USB Telefon Ekran Yansıtma** (scrcpy ile)
+- 🎥 **Geri Görüş Kamerası** (USB kamera desteği)
 - 🔌 **Otomatik Port Algılama** (İşletim sistemine göre)
 - 🌐 **Multi-Platform Destek** (Windows, Linux, macOS)
 - 🔄 **Otomatik Yeniden Bağlanma**
@@ -39,6 +40,8 @@ Tesla tarzı, modern araç kontrol paneli uygulaması. Arduino tabanlı elektron
 - Python 3.8+
 - PySide6 (Qt6)
 - pyserial
+- opencv-python (Kamera desteği için)
+- numpy (Görüntü işleme için)
 - pybluez (Bluetooth desteği için)
 
 ### Donanım
@@ -46,6 +49,7 @@ Tesla tarzı, modern araç kontrol paneli uygulaması. Arduino tabanlı elektron
 - USB/WiFi/Bluetooth bağlantı
 - Enkoder (direksiyon açısı için)
 - Motor sürücüleri
+- USB Kamera (Geri görüş için, Raspberry Pi'ye takılı)
 
 ### Opsiyonel
 - Android telefon (ekran yansıtma için)
@@ -121,6 +125,24 @@ Uygulama otomatik olarak USB portunu algılamaya çalışacaktır.
 3. Alt paneldeki **📱 Telefon** butonuna tıklayın
 4. Açılan panelden **Ekranı Yansıt** butonuna basın
 
+### Geri Görüş Kamerası
+
+1. USB kamerayı Raspberry Pi'ye takın
+2. Kamera genellikle `/dev/video0` olarak algılanır
+3. Aracı **geri vitese** takın
+4. Otomatik olarak:
+   - Harita görünümü gizlenir
+   - Geri görüş kamerası aktif olur
+   - Park yardım çizgileri görüntülenir
+5. İleri vitese geçtiğinizde harita görünümüne geri döner
+
+**Kamera Ayarları:**
+- Varsayılan kamera: `/dev/video0`
+- Farklı bir kamera kullanmak için `main.py` dosyasındaki `camera_index` değerini değiştirin:
+  ```python
+  self.camera_view = CameraView(camera_index=1)  # /dev/video1 için
+  ```
+
 ## 📊 Arduino Serial Protokolü
 
 Uygulama aşağıdaki formatta veri bekler:
@@ -177,6 +199,26 @@ mode/far/durum/far2/vites/sinyallambasi/dortlu/sinyalsol/sinyalsag/speed1/speed2
 - ADB ve scrcpy kurulu olmalı
 - Telefonda USB Hata Ayıklama açık olmalı
 - İlk bağlantıda telefonda izin vermeniz gerekebilir
+
+### Geri Görüş Kamerası Çalışmıyor
+- USB kameranın Raspberry Pi'ye takılı olduğundan emin olun
+- Kamera cihaz dosyasını kontrol edin:
+  ```bash
+  ls -l /dev/video*
+  ```
+- Kullanıcınızın `video` grubunda olması gerekir:
+  ```bash
+  sudo usermod -a -G video $USER
+  # Yeniden giriş yapın
+  ```
+- Kamera test:
+  ```bash
+  v4l2-ctl --list-devices
+  ```
+- OpenCV kütüphanelerinin yüklü olduğunu kontrol edin:
+  ```bash
+  pip install opencv-python numpy
+  ```
 
 ### Veri Gelmiyor
 - Serial ayarlarını kontrol edin (Baud rate: 115200)

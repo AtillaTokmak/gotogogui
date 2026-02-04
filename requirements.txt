@@ -20,6 +20,10 @@ requests>=2.31.0
 # Sistem İzleme
 psutil>=5.9.0
 
+# Kamera ve Görüntü İşleme
+opencv-python>=4.8.0
+numpy>=1.24.0
+
 # WiFi Kontrol (Linux/Raspberry Pi için)
 nmcli>=0.0.1
 

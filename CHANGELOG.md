@@ -1,5 +1,28 @@
 # Değişiklik Geçmişi
 
+## [2.1.0] - 2025-02-04
+
+### Yeni Özellikler ✨
+- **🎥 Geri Görüş Kamerası**: USB kamera desteği eklendi
+  - Geri vitese takılınca otomatik kamera görünümüne geçiş
+  - Park yardım çizgileri (yeşil, sarı, kırmızı bölgeler)
+  - 1280x720 çözünürlük, 30 FPS görüntü akışı
+  - Aynalama özelliği (daha kolay park için)
+  - İleri vitese geçince otomatik harita görünümüne dönüş
+  - Gerçek zamanlı video akışı (<100ms gecikme)
+
+### Teknik İyileştirmeler 🔧
+- OpenCV-Python entegrasyonu
+- NumPy görüntü işleme
+- Kaynak yönetimi (kamera başlat/durdur)
+- Thread-safe kamera operasyonları
+- Otomatik kamera cihaz algılama (/dev/video0)
+
+### Dokümantasyon 📚
+- Geri görüş kamerası kullanım kılavuzu
+- Raspberry Pi kamera kurulum talimatları
+- Sorun giderme bölümü güncellendi
+
 ## [2.0.0] - 2025-02-03
 
 ### Yeni Özellikler ✨
@@ -55,14 +78,14 @@
 
 ## Gelecek Sürümler için Planlanan Özellikler 🚀
 
-### [2.1.0] - Planlanan
-- [ ] Geri görüş kamerası entegrasyonu
+### [2.2.0] - Planlanan
 - [ ] CAN Bus desteği
 - [ ] Navigasyon entegrasyonu (turn-by-turn)
 - [ ] Spotify/YouTube media kontrolleri
 - [ ] Mesajlaşma özellikleri
 - [ ] Sesli asistan entegrasyonu
 - [ ] Tema özelleştirme paneli
+- [ ] Çoklu kamera desteği (ön, arka, yan)
 
 ### [3.0.0] - Uzun Vadeli
 - [ ] Bulut senkronizasyonu
