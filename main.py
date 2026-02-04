@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import (
+from  PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout, QMessageBox
 )
@@ -15,6 +15,7 @@ from ui.map_view import MapView
 from ui.bottom_bar import BottomBar
 from ui.media_overlay import MediaOverlay
 from ui.clock_widget import ClockWidget
+from ui.camera_view import CameraView
 
 
 class MainWindow(QMainWindow):
@@ -51,10 +52,17 @@ class MainWindow(QMainWindow):
         self.left_panel = LeftPanel()
         self.map_view = MapView()
         
+        # Geri görüş kamerası widget'ı
+        # Raspberry Pi'de genellikle /dev/video0 veya /dev/video1
+        self.camera_view = CameraView(camera_index=0)
+        self.camera_view.hide()  # Başlangıçta gizli
+        
         top_h.addWidget(self.left_panel)
         top_h.addWidget(self.map_view)
+        top_h.addWidget(self.camera_view)
         top_h.setStretch(0, 3)
         top_h.setStretch(1, 7)
+        top_h.setStretch(2, 7)  # Kamera aynı boyutta
         
         # -------- BOTTOM --------
         bottom_h = QHBoxLayout()
@@ -253,19 +261,30 @@ class MainWindow(QMainWindow):
             self.show_normal_view()
     
     def show_reverse_view(self):
-        """Geri vites görünümü"""
-        # TODO: Kamera entegrasyonu
-        # Şimdilik sadece map'i gizle veya overlay göster
-        pass
+        """Geri vites görünümü - Kamerayı göster"""
+        # Haritayı gizle, kamerayı göster
+        self.map_view.hide()
+        self.camera_view.show()
+        self.camera_view.start_camera()
+        print("🎥 Geri görüş kamerası aktif")
     
     def show_normal_view(self):
-        """Normal görünüm"""
-        pass
+        """Normal görünüm - Haritayı göster"""
+        # Kamerayı gizle, haritayı göster
+        if not self.camera_view.isHidden():
+            self.camera_view.stop_camera()
+            self.camera_view.hide()
+            self.map_view.show()
+            print("🗺️ Harita görünümüne dönüldü")
     
     def closeEvent(self, event):
         """Pencere kapatılırken temizlik"""
         if self.arduino_reader:
             self.arduino_reader.stop()
+        
+        # Kamerayı durdur
+        if self.camera_view:
+            self.camera_view.stop_camera()
         
         # Telefon ekran yansıtmayı durdur
         if self.map_view.scrcpy_process:

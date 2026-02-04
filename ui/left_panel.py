@@ -60,16 +60,47 @@ class LeftPanel(QWidget):
         gear_container.addWidget(self.gear_label)
         gear_container.addStretch()
         
-        # EDS göstergesi
+        # EDS göstergesi (küçük)
         self.eds_label = QLabel("EDS: KAPALI")
         self.eds_label.setAlignment(Qt.AlignCenter)
         self.eds_label.setStyleSheet("""
-            font-size: 14px;
+            font-size: 10px;
             color: #666;
-            padding: 5px;
+            padding: 3px;
             border: 1px solid #444;
-            border-radius: 5px;
+            border-radius: 3px;
         """)
+        
+        # Gaz, Sol Motor, Sağ Motor (mini göstergeler)
+        stats_container = QHBoxLayout()
+        
+        # Ortalama Gaz Yüzdesi
+        throttle_label = QLabel("Gaz:")
+        throttle_label.setStyleSheet("font-size: 12px; color: #aaa;")
+        self.throttle_value = QLabel("0%")
+        self.throttle_value.setStyleSheet("font-size: 12px; font-weight: bold; color: #ffaa00;")
+        
+        # Sol Motor Gaz
+        left_throttle_label = QLabel("Sol:")
+        left_throttle_label.setStyleSheet("font-size: 12px; color: #aaa;")
+        self.left_throttle_value = QLabel("0%")
+        self.left_throttle_value.setStyleSheet("font-size: 12px; font-weight: bold; color: #00aaff;")
+        
+        # Sağ Motor Gaz
+        right_throttle_label = QLabel("Sağ:")
+        right_throttle_label.setStyleSheet("font-size: 12px; color: #aaa;")
+        self.right_throttle_value = QLabel("0%")
+        self.right_throttle_value.setStyleSheet("font-size: 12px; font-weight: bold; color: #00aaff;")
+        
+        stats_container.addWidget(throttle_label)
+        stats_container.addWidget(self.throttle_value)
+        stats_container.addSpacing(10)
+        stats_container.addWidget(left_throttle_label)
+        stats_container.addWidget(self.left_throttle_value)
+        stats_container.addSpacing(10)
+        stats_container.addWidget(right_throttle_label)
+        stats_container.addWidget(self.right_throttle_value)
+        stats_container.addStretch()
         
         # Direksiyon açısı
         steering_container = QHBoxLayout()
@@ -124,6 +155,39 @@ class LeftPanel(QWidget):
         motor_layout.addLayout(left_motor_layout)
         motor_layout.addLayout(right_motor_layout)
         
+        # Sinyaller (Sol, Dörtlü, Sağ)
+        signals_container = QHBoxLayout()
+        
+        self.left_signal_light = QLabel("◄")
+        self.left_signal_light.setAlignment(Qt.AlignCenter)
+        self.left_signal_light.setStyleSheet("""
+            font-size: 32px;
+            color: #444;
+            min-width: 50px;
+        """)
+        
+        self.hazard_light = QLabel("◆")
+        self.hazard_light.setAlignment(Qt.AlignCenter)
+        self.hazard_light.setStyleSheet("""
+            font-size: 28px;
+            color: #444;
+            min-width: 50px;
+        """)
+        
+        self.right_signal_light = QLabel("►")
+        self.right_signal_light.setAlignment(Qt.AlignCenter)
+        self.right_signal_light.setStyleSheet("""
+            font-size: 32px;
+            color: #444;
+            min-width: 50px;
+        """)
+        
+        signals_container.addWidget(self.left_signal_light)
+        signals_container.addStretch()
+        signals_container.addWidget(self.hazard_light)
+        signals_container.addStretch()
+        signals_container.addWidget(self.right_signal_light)
+        
         # Araç göstergesi (basit SVG)
         self.car_indicator = CarIndicator()
         
@@ -133,8 +197,10 @@ class LeftPanel(QWidget):
         layout.addWidget(self.mode_label)
         layout.addLayout(gear_container)
         layout.addWidget(self.eds_label)
+        layout.addLayout(stats_container)
         layout.addLayout(steering_container)
         layout.addWidget(motor_frame)
+        layout.addLayout(signals_container)
         layout.addWidget(self.car_indicator)
         layout.addStretch()
     
@@ -183,22 +249,35 @@ class LeftPanel(QWidget):
             if data['EDS_AKTIF'] == 1:
                 self.eds_label.setText("EDS: AKTİF ✓")
                 self.eds_label.setStyleSheet("""
-                    font-size: 14px;
+                    font-size: 10px;
                     color: #00ff44;
                     font-weight: bold;
-                    padding: 5px;
-                    border: 2px solid #00ff44;
-                    border-radius: 5px;
+                    padding: 3px;
+                    border: 1px solid #00ff44;
+                    border-radius: 3px;
                 """)
             else:
                 self.eds_label.setText("EDS: KAPALI")
                 self.eds_label.setStyleSheet("""
-                    font-size: 14px;
+                    font-size: 10px;
                     color: #666;
-                    padding: 5px;
+                    padding: 3px;
                     border: 1px solid #444;
-                    border-radius: 5px;
+                    border-radius: 3px;
                 """)
+        
+        # Ortalama gaz yüzdesi (sol + sağ / 2)
+        if 'solGazYuzdesi' in data and 'sagGazYuzdesi' in data:
+            avg_throttle = (data['solGazYuzdesi'] + data['sagGazYuzdesi']) / 2.0
+            self.throttle_value.setText(f"{int(avg_throttle)}%")
+        
+        # Sol motor gaz yüzdesi
+        if 'solGazYuzdesi' in data:
+            self.left_throttle_value.setText(f"{data['solGazYuzdesi']}%")
+        
+        # Sağ motor gaz yüzdesi
+        if 'sagGazYuzdesi' in data:
+            self.right_throttle_value.setText(f"{data['sagGazYuzdesi']}%")
         
         # Direksiyon açısı
         if 'direksiyonaci' in data:
@@ -232,6 +311,56 @@ class LeftPanel(QWidget):
             headlight=data.get('far', 0),
             high_beam=data.get('far2', 0)
         )
+        
+        # Sinyalleri güncelle (yanıp sönme)
+        left_active = data.get('sinyalsol', 0) == 1 or data.get('dortlu', 0) == 1
+        right_active = data.get('sinyalsag', 0) == 1 or data.get('dortlu', 0) == 1
+        hazard_active = data.get('dortlu', 0) == 1
+        
+        # Sol sinyal
+        if left_active and self.car_indicator.blink_state:
+            self.left_signal_light.setStyleSheet("""
+                font-size: 32px;
+                color: #ffaa00;
+                font-weight: bold;
+                min-width: 50px;
+            """)
+        else:
+            self.left_signal_light.setStyleSheet("""
+                font-size: 32px;
+                color: #444;
+                min-width: 50px;
+            """)
+        
+        # Sağ sinyal
+        if right_active and self.car_indicator.blink_state:
+            self.right_signal_light.setStyleSheet("""
+                font-size: 32px;
+                color: #ffaa00;
+                font-weight: bold;
+                min-width: 50px;
+            """)
+        else:
+            self.right_signal_light.setStyleSheet("""
+                font-size: 32px;
+                color: #444;
+                min-width: 50px;
+            """)
+        
+        # Dörtlü sinyal (hazard)
+        if hazard_active and self.car_indicator.blink_state:
+            self.hazard_light.setStyleSheet("""
+                font-size: 28px;
+                color: #ff4444;
+                font-weight: bold;
+                min-width: 50px;
+            """)
+        else:
+            self.hazard_light.setStyleSheet("""
+                font-size: 28px;
+                color: #444;
+                min-width: 50px;
+            """)
 
 
 class PowerBar(QWidget):
